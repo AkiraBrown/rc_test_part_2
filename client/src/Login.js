@@ -1,10 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import checkToken from "./utils/CheckToken";
 
 const SignInForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (checkToken()) {
+      handleProtected();
+    }
+  }, []);
+  async function handleProtected() {
+    try {
+      const response = await axios.get("http://localhost:3001/protected", {
+        headers: {
+          Authorization: `Bearer ${window.localStorage.getItem("jwtToken")}`,
+        },
+      });
+      setMessage(response.data.message);
+    } catch (error) {
+      console.log(error);
+      setMessage("Bad Token: ", error);
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,10 +34,9 @@ const SignInForm = () => {
         username,
         password,
       });
-      if (response.data.token) {
-        setMessage(`Success! Jwt token => ${response.data.token}`);
-        console.log("Login successful: here's the jwt token ->", response.data);
-      }
+      setMessage(`Success! Jwt token => ${response.data.token}`);
+      console.log("Login successful: here's the jwt token ->", response.data);
+      window.localStorage.setItem("jwtToken", response.data.token);
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
       console.error("Error logging in:", error);
