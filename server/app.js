@@ -2,9 +2,11 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const logger = require("morgan");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
-const secretKey = "supersecretkey";
+
+const secretKey = process.env.SECRET_KEY;
 
 app.use(cors());
 app.use(logger("dev"));
