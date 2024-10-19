@@ -32,13 +32,18 @@ app.use(express.json());
 const users = [{ id: 1, username: "admin", password: "password" }];
 
 app.post("/login", (req, res) => {
+  console.log(req.headers.authorization);
   const { username, password } = req.body;
   const user = users.find(
     (u) => u.username === username && u.password === password
   );
 
   if (user) {
-    const token = jwt.sign({ id: user.id, username: user.username }, secretKey);
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      secretKey,
+      { expiresIn: "1h" }
+    );
     res.json({ token });
   } else {
     res.status(401).json({ message: "Invalid credentials" });
@@ -47,7 +52,7 @@ app.post("/login", (req, res) => {
 
 app.get("/protected", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-
+  console.log(token);
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
   }
