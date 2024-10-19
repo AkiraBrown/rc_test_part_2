@@ -14,9 +14,10 @@ const SignInForm = () => {
         username,
         password,
       });
-      setMessage(`Success! Jwt token => ${response.data.token}`);
-
-      console.log("Login successful: here's the jwt token ->", response.data);
+      if (response.data.token) {
+        setMessage(`Success! Jwt token => ${response.data.token}`);
+        console.log("Login successful: here's the jwt token ->", response.data);
+      }
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
       console.error("Error logging in:", error);
