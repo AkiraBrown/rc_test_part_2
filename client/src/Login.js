@@ -62,6 +62,7 @@ const SignInForm = () => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            pattern="[A-Za-z0-9\s]+"
             required
           />
         </div>
@@ -72,6 +73,7 @@ const SignInForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            pattern="[A-Za-z0-9\s]+"
           />
         </div>
         <button type="submit">Sign In</button>

@@ -2,6 +2,8 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const logger = require("morgan");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const helmet = require("helmet");
 require("dotenv").config();
 
 const app = express();
@@ -28,17 +30,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
+app.use(helmet());
 
-const users = [{ id: 1, username: "admin", password: "password" }];
+const hashedPassword = bcrypt.hashSync(process.env.USER_PASSWORD, 10);
+const users = [{ id: 1, username: "admin", password: hashedPassword }];
 
 app.post("/login", (req, res) => {
-  console.log(req.headers.authorization);
   const { username, password } = req.body;
-  const user = users.find(
-    (u) => u.username === username && u.password === password
-  );
+  const user = users.find((u) => u.username === username);
 
-  if (user) {
+  if (user && bcrypt.compareSync(password, user.password)) {
     const token = jwt.sign(
       { id: user.id, username: user.username },
       secretKey,
