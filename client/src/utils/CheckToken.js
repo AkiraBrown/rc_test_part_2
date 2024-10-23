@@ -7,7 +7,6 @@ function checkToken() {
     const decodedToken = jwtDecode(jwtToken);
     const currentTime = Date.now() / 1000;
     if (decodedToken.exp < currentTime) {
-      //   window.localStorage.removeItem("jwtToken");
       Cookie.remove("jwtToken");
       return false;
     } else {
