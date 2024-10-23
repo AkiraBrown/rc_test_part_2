@@ -19,6 +19,7 @@ const SignInForm = () => {
         headers: {
           Authorization: `Bearer ${Cookie.get("jwtToken")}`,
         },
+        withCredentials: true,
       });
       setMessage(response.data.message);
     } catch (error) {
@@ -36,7 +37,7 @@ const SignInForm = () => {
         password,
       });
       setMessage(`Success! Jwt token => ${response.data.token}`);
-      Cookie.set("jwtToken", response.data.token);
+      Cookie.set("jwtToken", response.data.token, { secure: true });
       console.log("Login successful: here's the jwt token ->", response.data);
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");

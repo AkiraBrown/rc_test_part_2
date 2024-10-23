@@ -4,6 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(helmet());
+app.use(cookieParser());
 
 const hashedPassword = bcrypt.hashSync(process.env.USER_PASSWORD, 10);
 const users = [{ id: 1, username: "admin", password: hashedPassword }];
@@ -52,7 +54,8 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/protected", (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  // const token = req.headers.authorization?.split(" ")[1];
+  const token = req.cookies.jwtToken;
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
   }
