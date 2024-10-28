@@ -9,8 +9,6 @@ require("dotenv").config();
 
 const app = express();
 
-const secretKey = process.env.SECRET_KEY;
-
 const targetUrl =
   process.env.NODE_ENV === "production"
     ? "<INSERT DEPLOYED FRONTEND LINK>"
@@ -34,6 +32,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cookieParser());
 
+const secretKey = process.env.SECRET_KEY;
 const hashedPassword = bcrypt.hashSync(process.env.USER_PASSWORD, 10);
 const users = [{ id: 1, username: "admin", password: hashedPassword }];
 
@@ -45,7 +44,7 @@ app.post("/login", (req, res) => {
     const token = jwt.sign(
       { id: user.id, username: user.username },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "3m" }
     );
     res.json({ token });
   } else {
@@ -54,7 +53,6 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/protected", (req, res) => {
-  // const token = req.headers.authorization?.split(" ")[1];
   const token = req.cookies.jwtToken;
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -72,7 +70,7 @@ app.get("/testing", (req, res) => {
   res.send("App is working!");
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

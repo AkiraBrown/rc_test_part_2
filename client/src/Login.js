@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import checkToken from "./utils/CheckToken";
 import Cookie from "js-cookie";
@@ -30,14 +31,17 @@ const SignInForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const response = await axios.post("http://localhost:3001/login", {
         username,
         password,
       });
       setMessage(`Success! Jwt token => ${response.data.token}`);
-      Cookie.set("jwtToken", response.data.token, { secure: true });
+      Cookie.set("jwtToken", response.data.token, {
+        secure: true,
+        expires: jwtDecode(response.data.token).exp,
+        sameSite: "Strict",
+      });
       console.log("Login successful: here's the jwt token ->", response.data);
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
