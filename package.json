@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "concurrently": "^9.0.1",
+    "cookie-parser": "^1.4.7",
+    "express-session": "^1.18.1",
     "helmet": "^8.0.0"
   }
 }

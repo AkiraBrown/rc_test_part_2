@@ -227,8 +227,83 @@ Cookie.set("jwtToken", response.data.token, {
   expires: jwtDecode(response.data.token).exp,
   sameSite: "Strict",
 });
-console.log("Login successful: here's the jwt token ->", response.data);
 ```
+
+We are taking the response and setting a cookie called jwtToken. Unlike local storage, cookies take in a string and can be secured by enforcing it to be only sent with https requests at production. This is done by setting the secure option to `true` and also setting the expiration time of the cookie so that it becomes invalid after 3 minutes. This protects in the event that the cookie is stolen and an attacker wanted to use the cookie to send forged authorized requests.
+
+```js
+<label>Username:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            pattern="[A-Za-z0-9\s]+"
+            required
+          />
+        </div>
+        <br />
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            title="Need a minimum length of 8"
+          />
+        </div>
+```
+
+We also applied a pattern attribute to the username input and a `minlength` of 8 for best practices. The pattern attribute on the username only accepts alphanumeric characters so that users cannot submit malicious code into the input form via username input. However, even if an attacker were to send some malicious code like a SQL injection or code injection, there's no database to interact with.
+
+# Check Tokens (Frontend)
+
+```js
+function checkToken() {
+  const jwtToken = Cookie.get("jwtToken");
+  if (jwtToken) {
+    const decodedToken = jwtDecode(jwtToken);
+    const currentTime = Date.now() / 1000;
+    if (decodedToken.exp < currentTime) {
+      Cookie.remove("jwtToken");
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
+```
+
+The purpose of this function is to check if there already exists a token in the users' cookies and check if the cookie is expired. If the cookie is expired then we remove the cookie. This ensures that the cookie is removed at expiration time. By running this check we can use it to persist a user's logged in state by returning false or true if the cookie is there.
+
+```js
+useEffect(() => {
+  if (checkToken()) {
+    handleProtected();
+  }
+}, []);
+async function handleProtected() {
+  try {
+    const response = await axios.get("http://localhost:3001/protected", {
+      headers: {
+        Authorization: `Bearer ${Cookie.get("jwtToken")}`,
+      },
+      withCredentials: true,
+    });
+    setMessage(response.data.message);
+  } catch (error) {
+    console.log(error);
+    setMessage("Bad Token: ", error);
+  }
+}
+```
+
+When paired with a `useEffect` we can automatically send a request to the `/protected` route on our server by using the stored cookie as authorization to access that route.
+
+### But Couldn't an attacker potentially access this route too?
+
+If an attacker was to take a users token and apply it into their cookies, then yes they can. Which is the reason why we've set the expiration time of the cookie for 3 minutes. This is a really short time frame for an attacker to wait for a stolen cookie to reach them and use that cookie to get access to the user's information.
 
 ### Sources
 

@@ -4,6 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
+const session = require("express-session");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -25,16 +26,25 @@ const corsOptions = {
   maxAge: 3600,
   credentials: true,
 };
+const secretKey = process.env.SECRET_KEY;
+const hashedPassword = bcrypt.hashSync(process.env.USER_PASSWORD, 10);
+const users = [{ id: 1, username: "admin", password: hashedPassword }];
+const sessionOptions = {
+  secret: secretKey,
+  resave: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  },
+};
 
 app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(helmet());
+app.use(session(sessionOptions));
 app.use(cookieParser());
-
-const secretKey = process.env.SECRET_KEY;
-const hashedPassword = bcrypt.hashSync(process.env.USER_PASSWORD, 10);
-const users = [{ id: 1, username: "admin", password: hashedPassword }];
+app.disable("x-powered-by");
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;

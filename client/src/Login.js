@@ -42,7 +42,6 @@ const SignInForm = () => {
         expires: jwtDecode(response.data.token).exp,
         sameSite: "Strict",
       });
-      console.log("Login successful: here's the jwt token ->", response.data);
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
       console.error("Error logging in:", error);
@@ -59,8 +58,10 @@ const SignInForm = () => {
           <br />
           username: admin
           <br />
-          password: password
+          password: Use the password you've set in your environment variables.
+          Must comply with standard password rules
         </div>
+        <br />
         <div>
           <label>Username:</label>
           <input
@@ -71,6 +72,7 @@ const SignInForm = () => {
             required
           />
         </div>
+        <br />
         <div>
           <label>Password:</label>
           <input
@@ -78,11 +80,14 @@ const SignInForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            pattern="[A-Za-z0-9\s]+"
+            minLength={8}
+            title="Need a minimum length of 8"
           />
         </div>
+        <br />
         <button type="submit">Sign In</button>
       </form>
+      <br />
       {message && <p>{message}</p>}
     </div>
   );
